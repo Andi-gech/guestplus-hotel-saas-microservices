@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Tenant {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  location            String
+  contactEmail        String   @unique
+  description         String?
+  logoUrl             String?
+  primaryColor        String?
+  secondaryColor      String?
+  pointsPerDollarSpent Int     @default(1)
+  referralBonusPoints  Int     @default(0)
+  birthdayBonusPoints  Int     @default(0)
+  subscriptionPlanId   Int?  
+  subscriptionPlan     SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  users               TenantUser[]
+}
+
+
+
+
+model TenantUser {
+  id        Int      @id @default(autoincrement())
+  tenantId  Int
+  userId    String  
+  role      UserRole
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+}
+
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+}
+model SubscriptionPlan {
+  id          Int      @id @default(autoincrement())
+  name        String
+  maxRooms    Int
+  maxStaff    Int
+  monthlyPrice Float
+  features    Json?
+  createdAt   DateTime @default(now())
+  tenants     Tenant[]
+}
+
