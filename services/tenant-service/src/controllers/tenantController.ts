@@ -17,7 +17,7 @@ export const getAllTenants = async (req: Request, res: Response) => {
 
 export const getTenantById = async (req: Request, res: Response) => {
   try {
-    const tenant = await getTenantByIdService(Number(req.params.id));
+    const tenant = await getTenantByIdService(String(req.params.id));
     res.json(tenant);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch tenant" });
@@ -37,7 +37,7 @@ export const createTenant = async (req: Request, res: Response) => {
 export const updateTenant = async (req: Request, res: Response) => {
   try {
     const updatedTenant = await updateTenantService(
-      Number(req.params.id),
+      String(req.params.id),
       req.body
     );
     res.json(updatedTenant);

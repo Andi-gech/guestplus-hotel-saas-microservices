@@ -7,7 +7,8 @@ const options = {
     info: {
       title: "GuestPlus Tenant Service API",
       version: "1.0.0",
-      description: "API documentation for Tenant and related modules",
+      description:
+        "Tenant Service API — manages tenants, tenant users, and subscription plans. Spec: /api/v1/api-docs.json · UI: /api/v1/api-docs",
     },
     servers: [{ url: "http://localhost:3000/api/v1" }],
   },
@@ -21,7 +22,9 @@ export const setupSwagger = (app: Express): void => {
   app.use(
     "/api/v1/api-docs",
     apiReference({
-      spec: { url: "/api/v1/api-docs.json" },
+      spec: {
+        url: "/api/v1/api-docs.json",
+      },
 
       theme: "elysiajs",
       defaultOpenAllTags: true,
@@ -30,11 +33,12 @@ export const setupSwagger = (app: Express): void => {
       hideClientButton: true,
       hideDarkModeToggle: true,
       showSidebar: true,
-      showToolbar: "localhost",
+
       operationTitleSource: "summary",
       persistAuth: false,
       telemetry: true,
       layout: "modern",
+      showToolbar: "never",
       isEditable: false,
       isLoading: false,
       hideModels: false,

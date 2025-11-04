@@ -15,7 +15,7 @@
  *         - contactEmail
  *       properties:
  *         id:
- *           type: integer
+ *           type: string
  *         name:
  *           type: string
  *         contactEmail:
@@ -37,11 +37,11 @@
  *         birthdayBonusPoints:
  *           type: integer
  *         subscriptionPlanId:
- *           type: integer
+ *           type: string
  *         users:
  *           type: array
  *           items:
- *             type: integer
+ *             type: string
  *         isActive:
  *           type: boolean
  *         createdAt:
@@ -71,13 +71,52 @@
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Tenant'
+ *           example:
+ *             name: "Acme Hotel"
+ *             contactEmail: "contact@acmehotel.com"
+ *             location: "Addis Ababa"
+ *             description: "A boutique hotel"
+ *             logoUrl: "https://example.com/logo.png"
+ *             primaryColor: "#FF5722"
+ *             secondaryColor: "#37474F"
+ *             pointsPerDollarSpent: 1
+ *             referralBonusPoints: 100
+ *             birthdayBonusPoints: 50
+ *             subscriptionPlanId: "550e8400-e29b-41d4-a716-446655440000"
+ *             users: ["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"]
+ *             isActive: true
  *     responses:
  *       201:
  *         description: Tenant created successfully
- *     400:
- *       description: Invalid request data
- *       content:
- *         application/json:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Tenant'
+ *             example:
+ *               id: "550e8400-e29b-41d4-a716-446655440000"
+ *               name: "Acme Hotel"
+ *               contactEmail: "contact@acmehotel.com"
+ *               location: "Addis Ababa"
+ *               description: "A boutique hotel"
+ *               logoUrl: "https://example.com/logo.png"
+ *               primaryColor: "#FF5722"
+ *               secondaryColor: "#37474F"
+ *               pointsPerDollarSpent: 1
+ *               referralBonusPoints: 100
+ *               birthdayBonusPoints: 50
+ *               subscriptionPlanId: "550e8400-e29b-41d4-a716-446655440000"
+ *               users: ["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"]
+ *               isActive: true
+ *       400:
+ *         description: Invalid request data
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                   error:
+ *                     type: string
+ *                example: { "error": "Invalid tenant data" }
  *
  */
 /**
@@ -91,7 +130,7 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
  *         description: Tenant found
@@ -110,7 +149,7 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -139,7 +178,7 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       204:
  *         description: Tenant deleted successfully

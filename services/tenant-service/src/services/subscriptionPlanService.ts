@@ -9,10 +9,10 @@ export const getAllSubscriptionPlansService = async () => {
   return await prisma.subscriptionPlan.findMany();
 };
 
-export const getSubscriptionPlanByIdService = async (id: number) => {
+export const getSubscriptionPlanByIdService = async (id: string) => {
   return await prisma.subscriptionPlan.findUnique({ where: { id } });
 };
 
-export const updateSubscriptionPlanService = async (id: number, data: any) => {
+export const updateSubscriptionPlanService = async (id: string, data: any) => {
   return await prisma.subscriptionPlan.update({ where: { id }, data });
 };

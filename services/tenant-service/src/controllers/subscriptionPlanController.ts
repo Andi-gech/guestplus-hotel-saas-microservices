@@ -17,7 +17,7 @@ export const getAllSubscriptionPlans = async (req: Request, res: Response) => {
 
 export const getSubscriptionPlanById = async (req: Request, res: Response) => {
   try {
-    const plan = await getSubscriptionPlanByIdService(Number(req.params.id));
+    const plan = await getSubscriptionPlanByIdService(String(req.params.id));
     res.json(plan);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch subscription plan" });
@@ -37,7 +37,7 @@ export const createSubscriptionPlan = async (req: Request, res: Response) => {
 export const updateSubscriptionPlan = async (req: Request, res: Response) => {
   try {
     const updatedPlan = await updateSubscriptionPlanService(
-      Number(req.params.id),
+      String(req.params.id),
       req.body
     );
     res.json(updatedPlan);
