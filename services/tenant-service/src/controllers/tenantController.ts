@@ -4,33 +4,42 @@ import {
   getTenantByIdService,
   createTenantService,
   updateTenantService,
+  deleteTenantService,
 } from "../services/tenantService";
+import {
+  sendSuccess,
+  sendCreated,
+  sendNotFound,
+  sendServerError,
+} from "../utils/responseHandler";
 
 export const getAllTenants = async (req: Request, res: Response) => {
   try {
     const tenants = await getAllTenantsService();
-    res.json(tenants);
+    sendSuccess(res, tenants, "All tenants fetched");
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch tenants" });
+    sendServerError(res, "Failed to fetch tenants");
   }
 };
 
 export const getTenantById = async (req: Request, res: Response) => {
   try {
     const tenant = await getTenantByIdService(String(req.params.id));
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch tenant" });
+    sendSuccess(res, tenant, "Tenant fetched");
+  } catch (err: any) {
+    if (err.message === "404") return sendNotFound(res, "Tenant not found");
+    sendServerError(res, "Failed to fetch tenant");
   }
 };
 
 export const createTenant = async (req: Request, res: Response) => {
   try {
     const newTenant = await createTenantService(req.body);
-    res.status(201).json(newTenant);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create tenant" });
+    sendCreated(res, newTenant, "Tenant created");
+  } catch (err: any) {
+    if (err?.message === "404")
+      return sendNotFound(res, "Subscription plan not found");
+    sendServerError(res, "Failed to create tenant");
   }
 };
 
@@ -40,8 +49,18 @@ export const updateTenant = async (req: Request, res: Response) => {
       String(req.params.id),
       req.body
     );
-    res.json(updatedTenant);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update tenant" });
+    sendSuccess(res, updatedTenant, "Tenant updated");
+  } catch (err: any) {
+    if (err.message === "404") return sendNotFound(res, "Tenant not found");
+    sendServerError(res, "Failed to update tenant");
+  }
+};
+export const deleteTenant = async (req: Request, res: Response) => {
+  try {
+    await deleteTenantService(String(req.params.id));
+    sendSuccess(res, null, "Tenant deleted");
+  } catch (err: any) {
+    if (err.message === "404") return sendNotFound(res, "Tenant not found");
+    sendServerError(res, "Failed to delete tenant");
   }
 };

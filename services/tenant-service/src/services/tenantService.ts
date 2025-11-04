@@ -6,13 +6,27 @@ export const getAllTenantsService = async () => {
 };
 
 export const getTenantByIdService = async (id: string) => {
-  return await prisma.tenant.findUnique({ where: { id } });
+  const tenant = await prisma.tenant.findUnique({ where: { id } });
+  if (!tenant) throw new Error("404");
+  return tenant;
 };
 
 export const createTenantService = async (data: any) => {
+  const subscriptionPlan = await prisma.subscriptionPlan.findUnique({
+    where: { id: data.subscriptionPlanId },
+  });
+  if (!subscriptionPlan) throw new Error("404");
   return await prisma.tenant.create({ data });
 };
 
 export const updateTenantService = async (id: string, data: any) => {
+  const tenant = await prisma.tenant.findUnique({ where: { id } });
+  if (!tenant) throw new Error("404");
   return await prisma.tenant.update({ where: { id }, data });
+};
+
+export const deleteTenantService = async (id: string) => {
+  const tenant = await prisma.tenant.findUnique({ where: { id } });
+  if (!tenant) throw new Error("404");
+  return await prisma.tenant.delete({ where: { id } });
 };

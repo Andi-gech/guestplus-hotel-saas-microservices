@@ -10,9 +10,19 @@ export const getAllSubscriptionPlansService = async () => {
 };
 
 export const getSubscriptionPlanByIdService = async (id: string) => {
-  return await prisma.subscriptionPlan.findUnique({ where: { id } });
+  const plan = await prisma.subscriptionPlan.findUnique({ where: { id } });
+  if (!plan) throw new Error("404");
+  return plan;
 };
 
 export const updateSubscriptionPlanService = async (id: string, data: any) => {
+  const plan = await prisma.subscriptionPlan.findUnique({ where: { id } });
+  if (!plan) throw new Error("404");
   return await prisma.subscriptionPlan.update({ where: { id }, data });
+};
+
+export const deleteSubscriptionPlanService = async (id: string) => {
+  const plan = await prisma.subscriptionPlan.findUnique({ where: { id } });
+  if (!plan) throw new Error("404");
+  return await prisma.subscriptionPlan.delete({ where: { id } });
 };

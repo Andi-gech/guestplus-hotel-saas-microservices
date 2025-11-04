@@ -38,10 +38,6 @@
  *           type: integer
  *         subscriptionPlanId:
  *           type: string
- *         users:
- *           type: array
- *           items:
- *             type: string
  *         isActive:
  *           type: boolean
  *         createdAt:
@@ -83,7 +79,6 @@
  *             referralBonusPoints: 100
  *             birthdayBonusPoints: 50
  *             subscriptionPlanId: "550e8400-e29b-41d4-a716-446655440000"
- *             users: ["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"]
  *             isActive: true
  *     responses:
  *       201:
@@ -105,7 +100,6 @@
  *               referralBonusPoints: 100
  *               birthdayBonusPoints: 50
  *               subscriptionPlanId: "550e8400-e29b-41d4-a716-446655440000"
- *               users: ["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"]
  *               isActive: true
  *       400:
  *         description: Invalid request data
