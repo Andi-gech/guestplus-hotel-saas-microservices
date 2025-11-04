@@ -1,12 +1,11 @@
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
-
+import swaggerJsdoc from "swagger-jsdoc";
+import { apiReference } from "@scalar/express-api-reference";
 const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Tenant Microservice API",
+      title: "GuestPlus Tenant Service API",
       version: "1.0.0",
       description: "API documentation for Tenant and related modules",
     },
@@ -18,5 +17,38 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 export const setupSwagger = (app: Express): void => {
-  app.use("/api/v1/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get("/api/v1/api-docs.json", (req, res) => res.json(swaggerSpec));
+  app.use(
+    "/api/v1/api-docs",
+    apiReference({
+      spec: { url: "/api/v1/api-docs.json" },
+
+      theme: "elysiajs",
+      defaultOpenAllTags: true,
+      expandAllModelSections: true,
+      expandAllResponses: true,
+      hideClientButton: true,
+      hideDarkModeToggle: true,
+      showSidebar: true,
+      showToolbar: "localhost",
+      operationTitleSource: "summary",
+      persistAuth: false,
+      telemetry: true,
+      layout: "modern",
+      isEditable: false,
+      isLoading: false,
+      hideModels: false,
+      documentDownloadType: "both",
+      hideTestRequestButton: false,
+      hideSearch: false,
+      showOperationId: false,
+      withDefaultFonts: true,
+      orderSchemaPropertiesBy: "alpha",
+      orderRequiredPropertiesFirst: true,
+      _integration: "express",
+      default: false,
+      slug: "tenant-service",
+      title: "GuestPlus Tenant Service API",
+    })
+  );
 };

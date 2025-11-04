@@ -32,6 +32,7 @@
  * /tenant-users:
  *   get:
  *     summary: Get all tenant users
+ *     tags: [Tenant users]
  *     responses:
  *       200:
  *         description: A list of tenant users
@@ -43,6 +44,7 @@
  * /tenant-users/{id}:
  *   get:
  *     summary: Get a tenant user by ID
+ *     tags: [Tenant users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -62,45 +64,70 @@
  * @swagger
  * /tenant-users:
  *   post:
- *    summary: Create a new tenant user
- *   requestBody:
- *    required: true
- *   content:
- *    application/json:
- *     schema:
- *      $ref: '#/components/schemas/TenantUser'
- *  responses:
- *    201:
- *    description: Tenant user created successfully
- *   400:
- *    description: Bad request
- *  500:
- *   description: Server error
- * /**
+ *     summary: Create a new tenant user
+ *     tags: [Tenant users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TenantUser'
+ *     responses:
+ *       201:
+ *         description: Tenant user created successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Server error
+ *
+ */
+/**
  * @swagger
  * /tenant-users/{id}:
  *   put:
  *     summary: Update a tenant user by ID
- *    parameters:
- *      - in: path
- *       name: id
- *      required: true
- *    description: The ID of the tenant user
- *    schema:
- *      type: integer
- *  requestBody:
- *    required: true
- *    content:
- *      application/json:
- *        schema:
- *          $ref: '#/components/schemas/TenantUser'
- *   responses:
- *    200:
- *    description: Tenant user updated successfully
- *    400:
- *    description: Bad request
- *   404:
- *    description: Tenant user not found
- * 500:
- *  description: Server error
+ *     tags: [Tenant users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the tenant user
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TenantUser'
+ *     responses:
+ *       200:
+ *         description: Tenant user updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Tenant user not found
+ *       500:
+ *         description: Server error
+ * */
+/**
+ * @swagger
+ * /tenant-users/{id}:
+ *   delete:
+ *     summary: Delete tenant user by ID
+ *     tags: [Tenant users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the tenant user
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Tenant user deleted successfully
+ *       404:
+ *         description: Tenant user not found
+ *       500:
+ *         description: Server error
  * */
