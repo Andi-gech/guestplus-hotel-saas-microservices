@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { verifyCodeService, createCodeService } from "./CodeService";
+
 import { comparePasswords, hashPassword } from "../utils/crypto";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 
@@ -16,10 +16,14 @@ export const getAllUsersService = async () => {
 };
 
 export const getUserByIdService = async (id: string) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    omit: { passwordHash: true },
+  });
   if (!user) throw new Error("404");
   return user;
 };
+
 export const getUserByEmail = async (email: string, tenantId: string) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -34,46 +38,33 @@ export const getUserByEmail = async (email: string, tenantId: string) => {
 };
 
 export const createUserService = async (data: any) => {
-  const user = await prisma.user.create({ data, omit: { passwordHash: true } });
-  const code = await createCodeService(user.id);
-  return { user, code };
+  const hashedPassword = await hashPassword(data.password);
+  const user = await prisma.user.create({
+    data: { ...data, passwordHash: hashedPassword },
+    omit: { passwordHash: true },
+  });
+
+  return { user };
 };
 
 export const changeUserPasswordService = async (
-  email: string,
-  code: string,
-  hashedPassword: string,
-  tenantId: string
+  userId: string,
+
+  newPassword: string
 ) => {
-  const user = await getUserByEmail(email, tenantId);
-  if (!user.isEmailVerified)
-    throw new Error("Verify your email to manage your account .");
-
-  const isValidCode = await verifyCodeService(email, tenantId, code);
-  if (!isValidCode) throw new Error("Invalid password reset code");
-
+  const hashedPassword = await hashPassword(newPassword);
   return await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     omit: { passwordHash: true },
     data: { passwordHash: hashedPassword },
   });
 };
-export const requestPasswordResetService = async (
-  email: string,
-  tenantId: string
-) => {
-  const user = await getUserByEmail(email, tenantId);
-  if (!user.isEmailVerified)
-    throw new Error("Verify your email to manage your account .");
-
-  const createResetCode = await createCodeService(user.id);
-  return createResetCode;
-};
 
 export const deleteUserService = async (id: string) => {
   const user = await getUserByIdService(id);
+  console.log("Deleting user:", user);
   if (!user.isEmailVerified)
-    throw new Error("Verify your email to manage your account .");
+    throw new Error("to do this action verify your email first.");
 
   const [deletedUser] = await prisma.$transaction([
     prisma.emailVerificationCode.deleteMany({ where: { userId: user.id } }),
@@ -82,6 +73,7 @@ export const deleteUserService = async (id: string) => {
   ]);
   return deletedUser;
 };
+
 export const loginUserService = async (credentials: {
   email: string;
   password: string;
@@ -128,17 +120,10 @@ export const loginUserService = async (credentials: {
     },
   };
 };
-export const verifyEmailService = async (
-  email: string,
-  tenantId: string,
-  code: string
-) => {
-  const user = await getUserByEmail(email, tenantId);
-  if (user.isEmailVerified) throw new Error("Email already verified.");
-  const isValidCode = await verifyCodeService(email, tenantId, code);
-  if (!isValidCode) throw new Error("Invalid verification code.");
+
+export const verifyEmailService = async (userId: string) => {
   return await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     data: { isEmailVerified: true },
     omit: { passwordHash: true },
   });

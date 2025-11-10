@@ -4,14 +4,13 @@ import {
   getUserByIdService,
   createUserService,
   changeUserPasswordService,
-  requestPasswordResetService,
   deleteUserService,
   loginUserService,
   verifyEmailService,
+  getUserByEmail,
 } from "../services/userService";
 import { sendSuccess, sendError } from "../utils/responseHandler";
-import { verifyCodeService } from "../services/CodeService";
-import { hashPassword } from "../utils/crypto";
+import { createCodeService, verifyCodeService } from "../services/CodeService";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -34,19 +33,19 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const hashedPassword = await hashPassword(req.body.password);
-    req.body.passwordHash = hashedPassword;
-    delete req.body.password;
     const newUser = await createUserService(req.body);
-    sendSuccess(res, newUser, "User created");
+    const code = await createCodeService(String(newUser.user.id));
+    sendSuccess(res, { user: newUser, code }, "User created");
   } catch (err: any) {
     sendError(res, 500, err?.message || "Failed to create user");
   }
 };
+
 export const requestPasswordReset = async (req: Request, res: Response) => {
   try {
     const { email, tenantId } = req.body;
-    const resetCode = await requestPasswordResetService(email, tenantId);
+    const user = await getUserByEmail(email, tenantId);
+    const resetCode = await createCodeService(user.id);
     sendSuccess(res, resetCode, "Password reset code created");
   } catch (err: any) {
     if (err.message === "404") return sendError(res, 404, "User not found");
@@ -56,20 +55,16 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
 
 export const changeUserPassword = async (req: Request, res: Response) => {
   try {
-    const resetCode = await verifyCodeService(
-      req.body.email,
-      req.body.tenantId,
-      req.body.code
-    );
-    if (!resetCode) {
+    const user = await getUserByEmail(req.body.email, req.body.tenantId);
+    const isValidCode = await verifyCodeService(user.id, req.body.code);
+
+    if (!isValidCode) {
       return sendError(res, 400, "Invalid password reset code");
     }
-    const hashedPassword = await hashPassword(req.body.newPassword);
+
     const updatedUser = await changeUserPasswordService(
-      req.body.email,
-      req.body.code,
-      hashedPassword,
-      req.body.tenantId
+      user.id,
+      req.body.newPassword
     );
 
     sendSuccess(res, updatedUser, "User password updated");
@@ -78,9 +73,11 @@ export const changeUserPassword = async (req: Request, res: Response) => {
     sendError(res, 500, err.message || "Failed to fetch user");
   }
 };
+
+//delete user
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    await deleteUserService(String(req.params.id));
+    await deleteUserService(String((req as any)?.user?.id));
     sendSuccess(res, null, "User deleted");
   } catch (err: any) {
     if (err.message === "404") return sendError(res, 404, "User not found");
@@ -88,6 +85,7 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+//login user
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const { user, accessToken, refreshToken } = await loginUserService({
@@ -122,7 +120,8 @@ export const getCurrentUser = async (req: Request, res: Response) => {
 export const resendPasswordResetCode = async (req: Request, res: Response) => {
   try {
     const { email, tenantId } = req.body;
-    const resetCode = await requestPasswordResetService(email, tenantId);
+    const user = await getUserByEmail(email, tenantId);
+    const resetCode = await createCodeService(user.id);
     sendSuccess(res, resetCode, "Password reset code resent");
   } catch (err: any) {
     if (err.message === "404") return sendError(res, 404, "User not found");
@@ -132,8 +131,13 @@ export const resendPasswordResetCode = async (req: Request, res: Response) => {
 
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    const { email, tenantId, code } = req.body;
-    const verifiedCode = await verifyEmailService(email, tenantId, code);
+    const { code } = req.body;
+    const user = await getUserByIdService(req.user.id);
+    if (user.isEmailVerified) throw new Error("Email already verified.");
+
+    const isValidCode = await verifyCodeService(user.id, code);
+    if (!isValidCode) throw new Error("Invalid verification code.");
+    const verifiedCode = await verifyEmailService(user.id);
     sendSuccess(res, verifiedCode, "Email verified successfully");
   } catch (err: any) {
     if (err.message === "404") return sendError(res, 404, "User not found");

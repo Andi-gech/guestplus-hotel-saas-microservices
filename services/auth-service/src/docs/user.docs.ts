@@ -212,3 +212,27 @@
  *       500:
  *         description: Failed to verify email
  */
+
+/**
+ * @swagger
+ * /users/me/current:
+ *   get:
+ *     summary: Get current authenticated user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         description: Bearer token
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Current user retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
