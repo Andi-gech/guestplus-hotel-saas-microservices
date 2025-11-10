@@ -93,7 +93,7 @@ export const loginUser = async (req: Request, res: Response) => {
       password: req.body.password,
       tenantId: req.body.tenantId,
     });
-    if (!user) return sendError(res, 404, "user not found");
+
     sendSuccess(
       res,
       { user, accessToken, refreshToken },
@@ -131,8 +131,8 @@ export const resendPasswordResetCode = async (req: Request, res: Response) => {
 
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    const { code } = req.body;
-    const user = await getUserByIdService(req.user.id);
+    const { code, email, tenantId } = req.body;
+    const user = await getUserByEmail(email, tenantId);
     if (user.isEmailVerified) throw new Error("Email already verified.");
 
     const isValidCode = await verifyCodeService(user.id, code);

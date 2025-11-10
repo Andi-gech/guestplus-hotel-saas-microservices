@@ -15,7 +15,7 @@ export const authMiddleware = (
   next: NextFunction
 ) => {
   const token = req.headers.authorization?.split(" ")[1];
-
+  console.log("Auth Middleware Token:", token);
   if (!token) {
     return sendError(res, 401, "Unauthorized");
   }
@@ -24,7 +24,7 @@ export const authMiddleware = (
   if (!payload) {
     return sendError(res, 401, "Unauthorized");
   }
-  console.log("Authenticated user payload:", payload);
+
   req.user = {
     id: payload.sub,
     tenantId: payload.tenantId,

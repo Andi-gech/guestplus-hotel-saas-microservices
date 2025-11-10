@@ -155,7 +155,12 @@
  *   get:
  *     summary: Get a user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         required: true
  *       - in: path
  *         name: id
  *         required: true
@@ -170,16 +175,16 @@
 
 /**
  * @swagger
- * /users/{id}:
+ * /users/:
  *   delete:
  *     summary: Delete a user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - in: header
+ *         name: Authorization
  *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: User deleted

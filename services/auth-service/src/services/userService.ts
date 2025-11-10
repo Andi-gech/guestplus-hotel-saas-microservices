@@ -4,15 +4,32 @@ import { comparePasswords, hashPassword } from "../utils/crypto";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 
 const prisma = new PrismaClient();
+
 export const getAllUsersService = async () => {
-  return await prisma.user.findMany({
-    where: {
+  const allUsers = await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
       isEmailVerified: true,
     },
-    omit: {
-      passwordHash: true,
-    },
   });
+
+  const groupedUsers = allUsers.reduce(
+    (acc, user) => {
+      if (user.isEmailVerified) {
+        acc.verified.push(user);
+      } else {
+        acc.unverified.push(user);
+      }
+      return acc;
+    },
+    { verified: [], unverified: [] } as {
+      verified: typeof allUsers;
+      unverified: typeof allUsers;
+    }
+  );
+
+  return groupedUsers;
 };
 
 export const getUserByIdService = async (id: string) => {
