@@ -24,8 +24,8 @@ export const generateAccessToken = (payload: {
   userId: string;
   tenantId?: string;
   role: string;
-}): string => {
-  return jwt.sign(
+}): { accessToken: string; expireIn: string } => {
+  const accessToken = jwt.sign(
     { sub: payload.userId, tenantId: payload.tenantId, scope: payload.role },
     JWT_PRIVATE_KEY,
     {
@@ -35,14 +35,20 @@ export const generateAccessToken = (payload: {
       audience: "microservices",
     }
   );
+
+  const expiresIn = "15m";
+  return {
+    accessToken,
+    expireIn: expiresIn,
+  };
 };
 
 export const generateRefreshToken = (payload: {
   userId: string;
   tenantId?: string;
   role: string;
-}): string => {
-  return jwt.sign(
+}): { refreshToken: string; expireIn: string } => {
+  const refreshToken = jwt.sign(
     { sub: payload.userId, tenantId: payload.tenantId, scope: payload.role },
     JWT_PRIVATE_KEY,
     {
@@ -52,6 +58,10 @@ export const generateRefreshToken = (payload: {
       audience: "microservices",
     }
   );
+  return {
+    refreshToken,
+    expireIn: "7d",
+  };
 };
 
 export const verifyToken = (token: string): JwtPayload | null => {

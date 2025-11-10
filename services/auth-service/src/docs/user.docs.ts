@@ -13,14 +13,14 @@
  *       type: object
  *       required:
  *         - email
+ *         - tenantId
+ *         - password
  *       properties:
- *         id:
- *           type: string
  *         email:
  *           type: string
  *         tenantId:
  *           type: string
- *         passwordHash:
+ *         password:
  *           type: string
  *         role:
  *           type: string
@@ -183,4 +183,32 @@
  *     responses:
  *       200:
  *         description: User deleted
+ */
+
+/**
+ * @swagger
+ * /users/verify-email:
+ *   post:
+ *     summary: Verify user email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               tenantId:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to verify email
  */

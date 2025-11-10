@@ -31,7 +31,8 @@ export const setupSwagger = (app: Express): void => {
       expandAllModelSections: true,
       expandAllResponses: true,
       hideClientButton: true,
-      hideDarkModeToggle: true,
+      mode: "light",
+
       showSidebar: true,
 
       operationTitleSource: "summary",

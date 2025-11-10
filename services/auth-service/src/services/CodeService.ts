@@ -1,28 +1,26 @@
 import { generate6DigitCode } from "../utils/crypto";
 import { PrismaClient } from "@prisma/client";
+import { getUserByEmail } from "./userService";
 
 const prisma = new PrismaClient();
 
-export const createPasswordResetCodeService = async (id: string) => {
+export const createCodeService = async (id: string) => {
+  //no need to check for user service b/c we already check on
   const generatedcode = generate6DigitCode();
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // expires in 15 minutes
   const resetData = { userId: id, code: generatedcode, expiresAt };
   return await prisma.passwordResetCode.create({ data: resetData });
 };
 
-export const ResendPasswordResetCodeService = async (
-  email: string,
-  tenantId: string
-) => {
-  // Use findFirst to avoid requiring the compound unique input (email+tenantId)
-  const user = await prisma.user.findFirst({ where: { email, tenantId } });
-  if (!user) throw new Error("404");
+export const ResendCodeService = async (email: string, tenantId: string) => {
+  const user = await getUserByEmail(email, tenantId);
   const generatedcode = generate6DigitCode();
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // expires in 15 minutes
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
   const resetData = { userId: user.id, code: generatedcode, expiresAt };
   return await prisma.passwordResetCode.create({ data: resetData });
 };
-export const verifyPasswordResetCodeService = async (
+
+export const verifyCodeService = async (
   email: string,
   tenantId: string,
   code: string
@@ -35,8 +33,7 @@ export const verifyPasswordResetCodeService = async (
     "code:",
     code
   );
-  const user = await prisma.user.findFirst({ where: { email, tenantId } });
-  if (!user) throw new Error("404");
+  const user = await getUserByEmail(email, tenantId);
   const resetCode = await prisma.passwordResetCode.findFirst({
     where: {
       userId: user.id,
