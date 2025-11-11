@@ -30,13 +30,13 @@ export const generateAccessToken = (payload: {
     JWT_PRIVATE_KEY,
     {
       algorithm: "RS256",
-      expiresIn: "15m",
+      expiresIn: "30d",
       issuer: "auth-service",
       audience: "microservices",
     }
   );
 
-  const expiresIn = "15m";
+  const expiresIn = "30d";
   return {
     accessToken,
     expireIn: expiresIn,

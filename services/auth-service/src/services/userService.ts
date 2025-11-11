@@ -55,10 +55,12 @@ export const getUserByEmail = async (email: string, tenantId: string) => {
 };
 
 export const createUserService = async (data: any) => {
+  console.log(data);
   const hashedPassword = await hashPassword(data.password);
+  delete data.password;
+
   const user = await prisma.user.create({
     data: { ...data, passwordHash: hashedPassword },
-    omit: { passwordHash: true },
   });
 
   return { user };
