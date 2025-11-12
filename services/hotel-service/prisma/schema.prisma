@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Hotel {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  address     String
+  city        String
+  country     String
+  rating      Float?
+  amenities   HotelAmenity[]
+  images      HotelImage[]
+  rooms       Room[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HotelAmenity {
+  id       String   @id @default(uuid())
+  hotelId  String
+  name     String
+  hotel    Hotel    @relation(fields: [hotelId], references: [id],onDelete: Cascade)
+}
+
+model HotelImage {
+  id       String   @id @default(uuid())
+  hotelId  String
+  url      String
+  hotel    Hotel    @relation(fields: [hotelId], references: [id],onDelete: Cascade)
+}
+
+
+
+
+model Room {
+  id          String   @id @default(uuid())
+  hotelId     String
+  name        String
+  description String?
+  capacity    Int
+  price       Float
+  createdAt   DateTime @default(now())
+  type        RoomType @default(STANDARD)
+  updatedAt   DateTime @updatedAt
+  status      RoomStatus @default(AVAILABLE)
+  RewardConfig RoomRewardConfig[]
+
+  hotel      Hotel    @relation(fields: [hotelId], references: [id],onDelete: Cascade)
+}
+
+model RoomRewardConfig {
+  id      String   @id @default(uuid())
+  roomId  String
+  config  String
+  room    Room     @relation(fields: [roomId], references: [id],onDelete: Cascade)
+}
+
+enum RoomType {
+  STANDARD
+  DELUXE
+  SUITE
+}
+enum RoomStatus {
+  AVAILABLE
+  BOOKED
+  MAINTENANCE
+}
+
