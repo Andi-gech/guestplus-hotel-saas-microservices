@@ -1,7 +1,7 @@
 import { Kafka, logLevel } from "kafkajs";
 
 const brokers = (process.env.KAFKA_BROKERS || "kafka:9092").split(",");
-const clientId = process.env.KAFKA_CLIENT_ID || "my-service";
+const clientId = process.env.KAFKA_CLIENT_ID || "tenant-service";
 
 export const kafka = new Kafka({
   clientId,

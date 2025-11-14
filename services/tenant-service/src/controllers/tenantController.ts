@@ -12,6 +12,7 @@ import {
   sendNotFound,
   sendServerError,
 } from "../utils/responseHandler";
+import { createProducer } from "../utils/kafkaClient";
 
 export const getAllTenants = async (req: Request, res: Response) => {
   try {
@@ -35,6 +36,21 @@ export const getTenantById = async (req: Request, res: Response) => {
 export const createTenant = async (req: Request, res: Response) => {
   try {
     const newTenant = await createTenantService(req.body);
+    const producer = await createProducer();
+    await producer.send({
+      topic: "tenant.created",
+      messages: [
+        {
+          key: newTenant.id,
+          value: JSON.stringify({
+            tenantId: newTenant.id,
+            adminEmail: req.body.adminEmail, // you can pass default admin info
+            adminPassword: req.body.adminPassword,
+          }),
+        },
+      ],
+    });
+    await producer.disconnect();
     sendCreated(res, newTenant, "Tenant created");
   } catch (err: any) {
     if (err?.message === "404")

@@ -10,6 +10,8 @@ import {
   getUserByEmail,
 } from "../services/userService";
 import { sendSuccess, sendError } from "../utils/responseHandler";
+import { createProducer, createConsumer } from "../utils/kafkaClient";
+
 import { createCodeService, verifyCodeService } from "../services/CodeService";
 
 export const getAllUsers = async (req: Request, res: Response) => {
