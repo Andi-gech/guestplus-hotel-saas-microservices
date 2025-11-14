@@ -1,6 +1,7 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { setupSwagger } from "./docs/swagger";
+import { runTenantConsumer } from "./kafka/tenantConsumer";
 import indexRoutes from "./routes/indexRoutes";
 import "dotenv/config";
 
@@ -27,3 +28,4 @@ async function startServer() {
 }
 
 startServer();
+runTenantConsumer();

@@ -2,7 +2,7 @@ import { createConsumer } from "../utils/kafkaClient";
 import { createUserService } from "../services/userService";
 import { createCodeService } from "../services/CodeService";
 
-const runTenantConsumer = async () => {
+export const runTenantConsumer = async () => {
   const consumer = await createConsumer("user-service-group");
   await consumer.subscribe({ topic: "tenant.created", fromBeginning: true });
 
@@ -28,5 +28,3 @@ const runTenantConsumer = async () => {
     },
   });
 };
-
-runTenantConsumer();
