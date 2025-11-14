@@ -41,6 +41,9 @@ export const createReservationController = async (
       guestName,
       guestEmail
     );
+    //fire and forget notification email to user about reservation creation
+    //fire event to room-service to block the room for 10 minutes until reservation is completed
+
     sendSuccess(res, reservation);
   } catch (error) {
     sendError(res, 500, "Failed to create reservation");
@@ -78,7 +81,12 @@ export const completeReservationController = async (
 ) => {
   try {
     const reservationId = req.params.id;
+    //payment processing would go here in a real-world scenario
     const reservation = await completeReservation(reservationId);
+    //fire and forget notification email to user about reservation completion
+    //send event to room-service to mark the room as noT AVAILABLE
+    //send event to reward-service to add loyalty points to user account
+
     sendSuccess(res, reservation);
   } catch (error) {
     sendError(res, 500, "Failed to complete reservation");

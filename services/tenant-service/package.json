@@ -23,6 +23,7 @@
     "@scalar/express-api-reference": "^0.8.23",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "kafkajs": "^2.2.4",
     "prisma": "^6.18.0",
     "swagger-jsdoc": "^6.2.8"
   }

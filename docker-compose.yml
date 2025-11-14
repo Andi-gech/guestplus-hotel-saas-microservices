@@ -1,0 +1,119 @@
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    depends_on:
+      - auth-service
+      - hotel-service
+      - reservation-service
+      - reward-service
+      - tenant-service
+      - kafka
+      - zookeeper
+    networks:
+      - app-network
+
+  auth-service:
+    build: ./services/auth-service
+    environment:
+      - PORT=3006
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CLIENT_ID=auth-service
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - zookeeper
+
+  hotel-service:
+    build: ./services/hotel-service
+    environment:
+      - PORT=3001
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CLIENT_ID=hotel-service
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - zookeeper
+
+  reservation-service:
+    build: ./services/reservation-service
+    environment:
+      - PORT=3003
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CLIENT_ID=reservation-service
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - zookeeper
+
+  reward-service:
+    build: ./services/reward-service
+    environment:
+      - PORT=3004
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CLIENT_ID=reward-service
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - zookeeper
+
+  tenant-service:
+    build: ./services/tenant-service
+    environment:
+      - PORT=3010
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CLIENT_ID=tenant-service
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - app-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
