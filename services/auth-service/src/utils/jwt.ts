@@ -1,14 +1,15 @@
 import jwt from "jsonwebtoken";
 import fs from "fs";
 
-const JWT_PUBLIC_KEY = fs.readFileSync(
-  process.env.JWT_PUBLIC_KEY_PATH!,
-  "utf8"
-);
-const JWT_PRIVATE_KEY = fs.readFileSync(
-  process.env.JWT_PRIVATE_KEY_PATH!,
-  "utf8"
-);
+const publicKeyPath = process.env.JWT_PUBLIC_KEY_PATH;
+const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
+
+if (!publicKeyPath || !privateKeyPath) {
+  throw new Error("JWT_PUBLIC_KEY_PATH and JWT_PRIVATE_KEY_PATH must be configured.");
+}
+
+const JWT_PUBLIC_KEY = fs.readFileSync(publicKeyPath, "utf8");
+const JWT_PRIVATE_KEY = fs.readFileSync(privateKeyPath, "utf8");
 
 export interface JwtPayload {
   sub: string;
@@ -25,22 +26,19 @@ export const generateAccessToken = (payload: {
   tenantId?: string;
   role: string;
 }): { accessToken: string; expireIn: string } => {
+  const expireIn = "15m";
   const accessToken = jwt.sign(
     { sub: payload.userId, tenantId: payload.tenantId, scope: payload.role },
     JWT_PRIVATE_KEY,
     {
       algorithm: "RS256",
-      expiresIn: "30d",
+      expiresIn: expireIn,
       issuer: "auth-service",
       audience: "microservices",
     }
   );
 
-  const expiresIn = "30d";
-  return {
-    accessToken,
-    expireIn: expiresIn,
-  };
+  return { accessToken, expireIn };
 };
 
 export const generateRefreshToken = (payload: {
@@ -48,31 +46,28 @@ export const generateRefreshToken = (payload: {
   tenantId?: string;
   role: string;
 }): { refreshToken: string; expireIn: string } => {
+  const expireIn = "7d";
   const refreshToken = jwt.sign(
     { sub: payload.userId, tenantId: payload.tenantId, scope: payload.role },
     JWT_PRIVATE_KEY,
     {
       algorithm: "RS256",
-      expiresIn: "7d",
+      expiresIn: expireIn,
       issuer: "auth-service",
       audience: "microservices",
     }
   );
-  return {
-    refreshToken,
-    expireIn: "7d",
-  };
+  return { refreshToken, expireIn };
 };
 
 export const verifyToken = (token: string): JwtPayload | null => {
   try {
-    const payload = jwt.verify(token, JWT_PUBLIC_KEY, {
+    return jwt.verify(token, JWT_PUBLIC_KEY, {
       algorithms: ["RS256"],
       issuer: "auth-service",
       audience: "microservices",
     }) as JwtPayload;
-    return payload;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
