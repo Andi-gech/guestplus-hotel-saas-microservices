@@ -14,7 +14,7 @@ export const getAllUsersService = async () => {
     },
   });
 
-  const groupedUsers = allUsers.reduce(
+  return allUsers.reduce(
     (acc, user) => {
       if (user.isEmailVerified) {
         acc.verified.push(user);
@@ -28,8 +28,6 @@ export const getAllUsersService = async () => {
       unverified: typeof allUsers;
     }
   );
-
-  return groupedUsers;
 };
 
 export const getUserByIdService = async (id: string) => {
@@ -45,22 +43,22 @@ export const getUserByEmail = async (email: string, tenantId: string) => {
   const user = await prisma.user.findUnique({
     where: {
       unique_user_email_per_tenant: {
-        email: email,
-        tenantId: tenantId,
+        email,
+        tenantId,
       },
     },
   });
-  if (!user) throw new Error("400");
+  if (!user) throw new Error("404");
   return user;
 };
 
 export const createUserService = async (data: any) => {
-  console.log(data);
-  const hashedPassword = await hashPassword(data.password);
-  delete data.password;
+  const { password, ...userData } = data;
+  const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.create({
-    data: { ...data, passwordHash: hashedPassword },
+    data: { ...userData, passwordHash },
+    omit: { passwordHash: true },
   });
 
   return { user };
@@ -68,22 +66,21 @@ export const createUserService = async (data: any) => {
 
 export const changeUserPasswordService = async (
   userId: string,
-
   newPassword: string
 ) => {
-  const hashedPassword = await hashPassword(newPassword);
-  return await prisma.user.update({
+  const passwordHash = await hashPassword(newPassword);
+  return prisma.user.update({
     where: { id: userId },
     omit: { passwordHash: true },
-    data: { passwordHash: hashedPassword },
+    data: { passwordHash },
   });
 };
 
 export const deleteUserService = async (id: string) => {
   const user = await getUserByIdService(id);
-  console.log("Deleting user:", user);
-  if (!user.isEmailVerified)
-    throw new Error("to do this action verify your email first.");
+  if (!user.isEmailVerified) {
+    throw new Error("Email verification is required before deleting this account.");
+  }
 
   const [deletedUser] = await prisma.$transaction([
     prisma.emailVerificationCode.deleteMany({ where: { userId: user.id } }),
@@ -100,8 +97,7 @@ export const loginUserService = async (credentials: {
 }) => {
   const user = await getUserByEmail(credentials.email, credentials.tenantId);
 
-  if (!user.isEmailVerified)
-    throw new Error("Verify your email to manage your account .");
+  if (!user.isEmailVerified) throw new Error("400");
 
   const isPasswordValid = await comparePasswords(
     credentials.password,
@@ -109,18 +105,14 @@ export const loginUserService = async (credentials: {
   );
 
   if (!isPasswordValid) throw new Error("400");
-  const { accessToken, expireIn } = generateAccessToken({
+  const tokenPayload = {
     userId: user.id,
-    tenantId: user.tenantId ? user.tenantId : undefined,
+    tenantId: user.tenantId || undefined,
     role: user.role,
-  });
-  const { refreshToken, expireIn: refreshTokenExpireIn } = generateRefreshToken(
-    {
-      userId: user.id,
-      tenantId: user.tenantId ? user.tenantId : undefined,
-      role: user.role,
-    }
-  );
+  };
+  const { accessToken, expireIn } = generateAccessToken(tokenPayload);
+  const { refreshToken, expireIn: refreshTokenExpireIn } =
+    generateRefreshToken(tokenPayload);
 
   return {
     user: {
@@ -129,19 +121,13 @@ export const loginUserService = async (credentials: {
       role: user.role,
       tenantId: user.tenantId,
     },
-    accessToken: {
-      accessToken,
-      expireIn,
-    },
-    refreshToken: {
-      refreshToken,
-      expireIn: refreshTokenExpireIn,
-    },
+    accessToken: { accessToken, expireIn },
+    refreshToken: { refreshToken, expireIn: refreshTokenExpireIn },
   };
 };
 
 export const verifyEmailService = async (userId: string) => {
-  return await prisma.user.update({
+  return prisma.user.update({
     where: { id: userId },
     data: { isEmailVerified: true },
     omit: { passwordHash: true },
